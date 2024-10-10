@@ -5,6 +5,13 @@
     <CodeAnalysisRuleSet>..\Analyzers.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>DeviceLib.SensorOmron</PackageId>
+    <Title>DeviceLib.SensorOmron</Title>
+    <Description>Library for 2JCIE-BU01.</Description>
+    <PackageTags>device sensor</PackageTags>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
   </ItemGroup>
