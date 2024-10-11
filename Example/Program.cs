@@ -1,6 +1,8 @@
 using DeviceLib.SensorOmron;
 
-using var sensor = new RbtSensorSerial("COM6");
+using var sensor = new RbtSensorSerial("COM12");
+
+await sensor.LedOnAsync(0, 255, 0).ConfigureAwait(false);
 
 using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
 while (await timer.WaitForNextTickAsync().ConfigureAwait(false))

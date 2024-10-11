@@ -62,40 +62,31 @@ public sealed class RbtSensorSerial : IDisposable
         }
     }
 
+    private void ClearValues()
+    {
+        Temperature = null;
+        Humidity = null;
+        Light = null;
+        Pressure = null;
+        Noise = null;
+        Discomfort = null;
+        Heat = null;
+        Etvoc = null;
+        Eco2 = null;
+        Seismic = null;
+    }
+
     public async ValueTask<bool> UpdateAsync(CancellationToken cancel = default)
     {
         ObjectDisposedException.ThrowIf(disposed, this);
 
         try
         {
-            port.Open();
-            port.DiscardOutBuffer();
-            port.DiscardInBuffer();
-
-            await port.BaseStream.WriteAsync(MeasureCommand, cancel).ConfigureAwait(false);
-            var read = 0;
-            var length = 4;
-            while (true)
+            var read = await TransitAsync(MeasureCommand, cancel).ConfigureAwait(false);
+            if (read < 35)
             {
-#pragma warning disable CA1835
-                read += await port.BaseStream.ReadAsync(buffer, read, length - read, cancel).ConfigureAwait(false);
-#pragma warning restore CA1835
-                if (read == length)
-                {
-                    if (read == 4)
-                    {
-                        length += BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(2, 2));
-                        if (length < 35)
-                        {
-                            ClearValues();
-                            return false;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+                ClearValues();
+                return false;
             }
 
             Temperature = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(8, 2)) / 100;
@@ -119,36 +110,82 @@ public sealed class RbtSensorSerial : IDisposable
             ClearValues();
             throw;
         }
+    }
+
+    public ValueTask<bool> LedOnAsync(byte r, byte g, byte b, CancellationToken cancel = default) =>
+        LedAsync(0x01, r, g, b, cancel);
+
+    public ValueTask<bool> LedOffAsync(CancellationToken cancel = default) =>
+        LedAsync(0x00, 0x00, 0x00, 0x00, cancel);
+
+    private async ValueTask<bool> LedAsync(byte on, byte r, byte g, byte b, CancellationToken cancel = default)
+    {
+        var size = 8 + 6;
+        var command = ArrayPool<byte>.Shared.Rent(size);
+        try
+        {
+            MakeCommand(command.AsSpan(0, size), [0x02, 0x11, 0x51, on, 0x00, r, g, b]);
+            var length = await TransitAsync(command.AsMemory(0, size), cancel).ConfigureAwait(false);
+            return length > 0;
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(command);
+        }
+    }
+
+    private async ValueTask<int> TransitAsync(ReadOnlyMemory<byte> command, CancellationToken cancel = default)
+    {
+        try
+        {
+            port.Open();
+            port.DiscardOutBuffer();
+            port.DiscardInBuffer();
+
+            await port.BaseStream.WriteAsync(command, cancel).ConfigureAwait(false);
+            var read = 0;
+            var length = 4;
+            while (true)
+            {
+#pragma warning disable CA1835
+                read += await port.BaseStream.ReadAsync(buffer, read, length - read, cancel).ConfigureAwait(false);
+#pragma warning restore CA1835
+                if (read == length)
+                {
+                    if (read == 4)
+                    {
+                        length += BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(2, 2));
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return read;
+        }
         finally
         {
             port.Close();
         }
     }
 
-    private void ClearValues()
-    {
-        Temperature = null;
-        Humidity = null;
-        Light = null;
-        Pressure = null;
-        Noise = null;
-        Discomfort = null;
-        Heat = null;
-        Etvoc = null;
-        Eco2 = null;
-        Seismic = null;
-    }
-
     public static byte[] MakeCommand(Span<byte> payload)
     {
-        var array = new byte[payload.Length + 6];
-        array[0] = 0x52;
-        array[1] = 0x42;
-        BinaryPrimitives.WriteUInt16LittleEndian(array.AsSpan(2, 2), (ushort)(payload.Length + 2));
-        payload.CopyTo(array.AsSpan(4));
-        var crc = CalcCrc(array.AsSpan(0, array.Length - 2));
-        BinaryPrimitives.WriteUInt16LittleEndian(array.AsSpan(array.Length - 2, 2), crc);
-        return array;
+        var command = new byte[payload.Length + 6];
+        MakeCommand(command, payload);
+        return command;
+    }
+
+    public static void MakeCommand(Span<byte> buffer, Span<byte> payload)
+    {
+        buffer[0] = 0x52;
+        buffer[1] = 0x42;
+        BinaryPrimitives.WriteUInt16LittleEndian(buffer.Slice(2, 2), (ushort)(payload.Length + 2));
+        payload.CopyTo(buffer[4..]);
+        var crc = CalcCrc(buffer[..^2]);
+        BinaryPrimitives.WriteUInt16LittleEndian(buffer.Slice(buffer.Length - 2, 2), crc);
     }
 
     private static ushort CalcCrc(Span<byte> span)
