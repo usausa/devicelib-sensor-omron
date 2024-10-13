@@ -12,7 +12,7 @@
     <PackageId>DeviceTool.SensorOmron</PackageId>
     <Title>SensorOmron tool</Title>
     <Description>SensorOmron tool</Description>
-    <PackageTags>sensor tools</PackageTags>
+    <PackageTags>tools sensor</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
