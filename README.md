@@ -1,7 +1,7 @@
 # OMRON 2JCIE-BU library
 
 | Package | Info |
-|-|-|-|
+|:-|:-|
 | DeviceLib.SensorOmron | [![NuGet Badge](https://buildstats.info/nuget/DeviceLib.SensorOmron)](https://www.nuget.org/packages/DeviceLib.SensorOmron/) |
 
 ## Usage
