@@ -62,6 +62,25 @@ public sealed class RbtSensorSerial : IDisposable
         }
     }
 
+    public bool IsOpen() => port.IsOpen;
+
+    public void Open()
+    {
+        if (IsOpen())
+        {
+            return;
+        }
+
+        port.Open();
+        port.DiscardOutBuffer();
+        port.DiscardInBuffer();
+    }
+
+    public void Close()
+    {
+        port.Close();
+    }
+
     private void ClearValues()
     {
         Temperature = null;
@@ -78,38 +97,29 @@ public sealed class RbtSensorSerial : IDisposable
 
     public async ValueTask<bool> UpdateAsync(CancellationToken cancel = default)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ClearValues();
 
-        try
+        var read = await TransitAsync(MeasureCommand, cancel).ConfigureAwait(false);
+        if (read < 35)
         {
-            var read = await TransitAsync(MeasureCommand, cancel).ConfigureAwait(false);
-            if (read < 35)
-            {
-                ClearValues();
-                return false;
-            }
-
-            Temperature = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(8, 2)) / 100;
-            Humidity = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(10, 2)) / 100;
-            Light = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(12, 2));
-            Pressure = (float)BinaryPrimitives.ReadInt32LittleEndian(buffer.AsSpan(14, 4)) / 1000;
-            Noise = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(18, 2)) / 100;
-
-            Discomfort = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(24, 2)) / 100;
-            Heat = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(26, 2)) / 100;
-
-            Etvoc = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(20, 2));
-            Eco2 = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(22, 2));
-
-            Seismic = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(33, 2)) / 1000;
-
-            return true;
+            return false;
         }
-        catch (Exception)
-        {
-            ClearValues();
-            throw;
-        }
+
+        Temperature = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(8, 2)) / 100;
+        Humidity = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(10, 2)) / 100;
+        Light = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(12, 2));
+        Pressure = (float)BinaryPrimitives.ReadInt32LittleEndian(buffer.AsSpan(14, 4)) / 1000;
+        Noise = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(18, 2)) / 100;
+
+        Discomfort = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(24, 2)) / 100;
+        Heat = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(26, 2)) / 100;
+
+        Etvoc = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(20, 2));
+        Eco2 = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(22, 2));
+
+        Seismic = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(33, 2)) / 1000;
+
+        return true;
     }
 
     public ValueTask<bool> LedOnAsync(byte r, byte g, byte b, CancellationToken cancel = default) =>
@@ -136,39 +146,35 @@ public sealed class RbtSensorSerial : IDisposable
 
     private async ValueTask<int> TransitAsync(ReadOnlyMemory<byte> command, CancellationToken cancel = default)
     {
-        try
-        {
-            port.Open();
-            port.DiscardOutBuffer();
-            port.DiscardInBuffer();
+        ObjectDisposedException.ThrowIf(disposed, this);
 
-            await port.BaseStream.WriteAsync(command, cancel).ConfigureAwait(false);
-            var read = 0;
-            var length = 4;
-            while (true)
-            {
+        if (!IsOpen())
+        {
+            return 0;
+        }
+
+        await port.BaseStream.WriteAsync(command, cancel).ConfigureAwait(false);
+        var read = 0;
+        var length = 4;
+        while (true)
+        {
 #pragma warning disable CA1835
-                read += await port.BaseStream.ReadAsync(buffer, read, length - read, cancel).ConfigureAwait(false);
+            read += await port.BaseStream.ReadAsync(buffer, read, length - read, cancel).ConfigureAwait(false);
 #pragma warning restore CA1835
-                if (read == length)
+            if (read == length)
+            {
+                if (read == 4)
                 {
-                    if (read == 4)
-                    {
-                        length += BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(2, 2));
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    length += BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(2, 2));
+                }
+                else
+                {
+                    break;
                 }
             }
+        }
 
-            return read;
-        }
-        finally
-        {
-            port.Close();
-        }
+        return read;
     }
 
     public static byte[] MakeCommand(Span<byte> payload)
