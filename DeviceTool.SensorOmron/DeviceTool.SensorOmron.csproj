@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <CodeAnalysisRuleSet>..\Analyzers.ruleset</CodeAnalysisRuleSet>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>rbttool</ToolCommandName>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>DeviceTool.SensorOmron</PackageId>
+    <Title>SensorOmron tool</Title>
+    <Description>SensorOmron tool</Description>
+    <PackageTags>sensor tools</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DeviceLib.SensorOmron\DeviceLib.SensorOmron.csproj" />
+  </ItemGroup>
+
+</Project>

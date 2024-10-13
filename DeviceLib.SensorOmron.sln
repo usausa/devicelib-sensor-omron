@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeviceLib.SensorOmron", "DeviceLib.SensorOmron\DeviceLib.SensorOmron.csproj", "{174916D8-E4DD-4D50-B0E2-0B75A6C17FFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Example\Example.csproj", "{EE3AEE57-BE84-4B35-A5A4-3FB566C1F75A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example", "Example\Example.csproj", "{EE3AEE57-BE84-4B35-A5A4-3FB566C1F75A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example", "Example", "{FF059738-DFA8-4546-8E6A-F5015BDFA38E}"
 EndProject
@@ -24,6 +24,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tool", "Tool", "{992A2725-CF4D-4097-B8A8-78A9DC1D8955}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceTool.SensorOmron", "DeviceTool.SensorOmron\DeviceTool.SensorOmron.csproj", "{1752AA4E-47F8-4F54-B727-CE461C5F1E30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +42,10 @@ Global
 		{EE3AEE57-BE84-4B35-A5A4-3FB566C1F75A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE3AEE57-BE84-4B35-A5A4-3FB566C1F75A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE3AEE57-BE84-4B35-A5A4-3FB566C1F75A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1752AA4E-47F8-4F54-B727-CE461C5F1E30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1752AA4E-47F8-4F54-B727-CE461C5F1E30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1752AA4E-47F8-4F54-B727-CE461C5F1E30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1752AA4E-47F8-4F54-B727-CE461C5F1E30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -45,6 +53,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{174916D8-E4DD-4D50-B0E2-0B75A6C17FFA} = {3170CD8A-85D5-4D96-A248-73EB1AB3429C}
 		{EE3AEE57-BE84-4B35-A5A4-3FB566C1F75A} = {FF059738-DFA8-4546-8E6A-F5015BDFA38E}
+		{1752AA4E-47F8-4F54-B727-CE461C5F1E30} = {992A2725-CF4D-4097-B8A8-78A9DC1D8955}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4564003F-031D-49DC-9BDE-1E4E64C24BC0}
