@@ -10,16 +10,12 @@
 using DeviceLib.SensorOmron;
 
 using var sensor = new RbtSensorSerial("COM12");
+sensor.Open();
+await sensor.LedOnAsync(0x00, 0xFF, 0x00).ConfigureAwait(false);
 
 using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
 while (await timer.WaitForNextTickAsync().ConfigureAwait(false))
 {
-    if (!sensor.IsOpen())
-    {
-        sensor.Open();
-        await sensor.LedOnAsync(0x00, 0xFF, 0x00).ConfigureAwait(false);
-    }
-
     if (await sensor.UpdateAsync().ConfigureAwait(false))
     {
         Console.WriteLine(
@@ -49,7 +45,7 @@ while (await timer.WaitForNextTickAsync().ConfigureAwait(false))
 ### Usage
 
 ```
-rbttool -p COM12 read
-rbttool -p COM12 led on -c 00FF00
-rbttool -p COM12 led off
+rbttool read -p COM12
+rbttool led on -p COM12 -c 00FF00
+rbttool led off -p COM12
 ```
