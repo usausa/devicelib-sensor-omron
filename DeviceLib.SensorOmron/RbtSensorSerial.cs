@@ -60,6 +60,8 @@ public sealed class RbtSensorSerial : IDisposable
 
             disposed = true;
         }
+
+        Close();
     }
 
     public bool IsOpen() => port.IsOpen;
@@ -78,6 +80,11 @@ public sealed class RbtSensorSerial : IDisposable
 
     public void Close()
     {
+        if (!IsOpen())
+        {
+            return;
+        }
+
         port.Close();
     }
 

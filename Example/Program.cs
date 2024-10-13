@@ -21,13 +21,13 @@ while (await timer.WaitForNextTickAsync().ConfigureAwait(false))
                 $"Temperature=[{sensor.Temperature:F2}], " +
                 $"Humidity=[{sensor.Humidity:F2}], " +
                 $"Light=[{sensor.Light}], " +
-                $"Pressure=[{sensor.Pressure:F3}], " +
+                $"Pressure=[{sensor.Pressure:F2}], " +
                 $"Noise=[{sensor.Noise:F2}], " +
                 $"Discomfort=[{sensor.Discomfort:F2}], " +
                 $"Heat=[{sensor.Heat:F2}], " +
                 $"Etvoc=[{sensor.Etvoc}], " +
                 $"Eco2=[{sensor.Eco2}], " +
-                $"Seismic=[{sensor.Seismic:F3}]");
+                $"Seismic=[{sensor.Seismic:F2}]");
         }
         else
         {
