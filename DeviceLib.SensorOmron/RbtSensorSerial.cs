@@ -15,25 +15,25 @@ public sealed class RbtSensorSerial : IDisposable
 
     private bool disposed;
 
-    public float? Temperature { get; private set; }
+    public double? Temperature { get; private set; }
 
-    public float? Humidity { get; private set; }
+    public double? Humidity { get; private set; }
 
-    public float? Light { get; private set; }
+    public double? Light { get; private set; }
 
-    public float? Pressure { get; private set; }
+    public double? Pressure { get; private set; }
 
-    public float? Noise { get; private set; }
+    public double? Noise { get; private set; }
 
-    public float? Discomfort { get; private set; }
+    public double? Discomfort { get; private set; }
 
-    public float? Heat { get; private set; }
+    public double? Heat { get; private set; }
 
-    public float? Etvoc { get; private set; }
+    public double? Etvoc { get; private set; }
 
-    public float? Eco2 { get; private set; }
+    public double? Eco2 { get; private set; }
 
-    public float? Seismic { get; private set; }
+    public double? Seismic { get; private set; }
 
     public RbtSensorSerial(string name)
     {
@@ -112,19 +112,19 @@ public sealed class RbtSensorSerial : IDisposable
             return false;
         }
 
-        Temperature = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(8, 2)) / 100;
-        Humidity = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(10, 2)) / 100;
+        Temperature = (double)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(8, 2)) / 100;
+        Humidity = (double)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(10, 2)) / 100;
         Light = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(12, 2));
-        Pressure = (float)BinaryPrimitives.ReadInt32LittleEndian(buffer.AsSpan(14, 4)) / 1000;
-        Noise = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(18, 2)) / 100;
+        Pressure = (double)BinaryPrimitives.ReadInt32LittleEndian(buffer.AsSpan(14, 4)) / 1000;
+        Noise = (double)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(18, 2)) / 100;
 
-        Discomfort = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(24, 2)) / 100;
-        Heat = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(26, 2)) / 100;
+        Discomfort = (double)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(24, 2)) / 100;
+        Heat = (double)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(26, 2)) / 100;
 
         Etvoc = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(20, 2));
         Eco2 = BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(22, 2));
 
-        Seismic = (float)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(33, 2)) / 1000;
+        Seismic = (double)BinaryPrimitives.ReadInt16LittleEndian(buffer.AsSpan(33, 2)) / 1000;
 
         return true;
     }
