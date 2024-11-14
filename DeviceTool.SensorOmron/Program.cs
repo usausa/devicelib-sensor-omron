@@ -10,7 +10,7 @@ rootCommand.AddGlobalOption(new Option<string>(["--port", "-p"], "Port") { IsReq
 
 // Read
 var readCommand = new Command("read", "Read");
-readCommand.Handler = CommandHandler.Create(async (IConsole console, string port) =>
+readCommand.Handler = CommandHandler.Create(async static (IConsole console, string port) =>
 {
     using var sensor = new RbtSensorSerial(port);
     sensor.Open();
@@ -38,7 +38,7 @@ rootCommand.Add(ledCommand);
 // Led on
 var ledOnCommand = new Command("on", "LED on");
 ledOnCommand.AddOption(new Option<string>(["--color", "-c"], static () => "000000", "Color"));
-ledOnCommand.Handler = CommandHandler.Create(async (string port, string color) =>
+ledOnCommand.Handler = CommandHandler.Create(async static (string port, string color) =>
 {
     using var sensor = new RbtSensorSerial(port);
     sensor.Open();
@@ -53,7 +53,7 @@ ledCommand.Add(ledOnCommand);
 
 // Led off
 var ledOffCommand = new Command("off", "LED off");
-ledOffCommand.Handler = CommandHandler.Create(async (string port) =>
+ledOffCommand.Handler = CommandHandler.Create(async static (string port) =>
 {
     using var sensor = new RbtSensorSerial(port);
     sensor.Open();
