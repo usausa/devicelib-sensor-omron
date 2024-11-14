@@ -2,7 +2,7 @@
 
 | Package | Info |
 |:-|:-|
-| DeviceLib.SensorOmron | [![NuGet Badge](https://buildstats.info/nuget/DeviceLib.SensorOmron)](https://www.nuget.org/packages/DeviceLib.SensorOmron/) |
+| DeviceLib.SensorOmron | [![NuGet](https://img.shields.io/nuget/v/DeviceLib.SensorOmron.svg)](https://www.nuget.org/packages/DeviceLib.SensorOmron) |
 
 ## Usage
 
