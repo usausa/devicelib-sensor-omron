@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Analyzers.ruleset" />
+    <File Path="DeviceLib.SensorOmron.sln.DotSettings" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Library/">
+    <Project Path="DeviceLib.SensorOmron/DeviceLib.SensorOmron.csproj" />
+  </Folder>
+  <Folder Name="/Tool/">
+    <Project Path="DeviceTool.SensorOmron/DeviceTool.SensorOmron.csproj" />
+  </Folder>
+  <Folder Name="/Example/">
+    <Project Path="Example/Example.csproj" />
+  </Folder>
+</Solution>
