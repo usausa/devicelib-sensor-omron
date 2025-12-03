@@ -52,16 +52,17 @@ public sealed class RbtSensorSerial : IDisposable
 
     public void Dispose()
     {
-        if (!disposed)
+        if (disposed)
         {
-            ArrayPool<byte>.Shared.Return(buffer);
-
-            port.Dispose();
-
-            disposed = true;
+            return;
         }
 
         Close();
+        port.Dispose();
+
+        ArrayPool<byte>.Shared.Return(buffer);
+
+        disposed = true;
     }
 
     public bool IsOpen() => port.IsOpen;
@@ -165,9 +166,7 @@ public sealed class RbtSensorSerial : IDisposable
         var length = 4;
         while (true)
         {
-#pragma warning disable CA1835
-            read += await port.BaseStream.ReadAsync(buffer, read, length - read, cancel).ConfigureAwait(false);
-#pragma warning restore CA1835
+            read += await port.BaseStream.ReadAsync(buffer.AsMemory(read, length - read), cancel).ConfigureAwait(false);
             if (read == length)
             {
                 if (read == 4)
@@ -184,14 +183,14 @@ public sealed class RbtSensorSerial : IDisposable
         return read;
     }
 
-    public static byte[] MakeCommand(Span<byte> payload)
+    private static byte[] MakeCommand(Span<byte> payload)
     {
         var command = new byte[payload.Length + 6];
         MakeCommand(command, payload);
         return command;
     }
 
-    public static void MakeCommand(Span<byte> buffer, Span<byte> payload)
+    private static void MakeCommand(Span<byte> buffer, Span<byte> payload)
     {
         buffer[0] = 0x52;
         buffer[1] = 0x42;
