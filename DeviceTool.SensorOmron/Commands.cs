@@ -4,8 +4,6 @@
 // ReSharper disable MemberCanBePrivate.Global
 namespace DeviceTool.SensorOmron;
 
-using System;
-
 using DeviceLib.SensorOmron;
 
 using Smart.CommandLine.Hosting;
