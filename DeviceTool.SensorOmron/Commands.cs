@@ -23,12 +23,12 @@ public static class CommandBuilderExtensions
 
 public abstract class CommandBase
 {
-    [Option<string>("--port", "-p", Description = "Port", IsRequired = true)]
+    [Option<string>("--port", "-p", Description = "Port", Required = true)]
     public string Port { get; set; } = default!;
 }
 
 // Read
-[Command("read", Description = "Read")]
+[Command("read", "Read")]
 public sealed class ReadCommand : CommandBase, ICommandHandler
 {
     public async ValueTask ExecuteAsync(CommandContext context)
@@ -53,13 +53,13 @@ public sealed class ReadCommand : CommandBase, ICommandHandler
 }
 
 // Led
-[Command("led", Description = "Led control")]
+[Command("led", "Led control")]
 public sealed class LedCommand
 {
 }
 
 // Led on
-[Command("on", Description = "Led on")]
+[Command("on", "Led on")]
 public sealed class LedOnCommand : CommandBase, ICommandHandler
 {
     [Option<string>("--color", "-c", Description = "Color", DefaultValue = "000000")]
@@ -79,7 +79,7 @@ public sealed class LedOnCommand : CommandBase, ICommandHandler
 }
 
 // Led off
-[Command("off", Description = "Led off")]
+[Command("off", "Led off")]
 public sealed class LedOffCommand : CommandBase, ICommandHandler
 {
     public async ValueTask ExecuteAsync(CommandContext context)
