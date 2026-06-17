@@ -164,33 +164,60 @@ public sealed class RbtSensorSerial : IDisposable
         await port.BaseStream.WriteAsync(command, cancel).ConfigureAwait(false);
         var read = 0;
         var length = 4;
-        while (true)
+        while (read < length)
         {
-            read += await port.BaseStream.ReadAsync(buffer.AsMemory(read, length - read), cancel).ConfigureAwait(false);
-            if (read == length)
+            var received = await port.BaseStream.ReadAsync(buffer.AsMemory(read, length - read), cancel).ConfigureAwait(false);
+            if (received == 0)
             {
-                if (read == 4)
+                return 0;
+            }
+
+            read += received;
+
+            if ((read == 4) && (length == 4))
+            {
+                if ((buffer[0] != 0x52) || (buffer[1] != 0x42))
                 {
-                    length += BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(2, 2));
+                    port.DiscardInBuffer();
+                    return 0;
                 }
-                else
+
+                var payloadLength = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(2, 2));
+                var total = 4 + payloadLength;
+                if ((payloadLength < 3) || (total > buffer.Length))
                 {
-                    break;
+                    port.DiscardInBuffer();
+                    return 0;
                 }
+
+                length = total;
             }
         }
 
-        return read;
+        var crcComputed = CalcCrc(buffer.AsSpan(0, length - 2));
+        var crcStored = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(length - 2, 2));
+        if (crcComputed != crcStored)
+        {
+            port.DiscardInBuffer();
+            return 0;
+        }
+
+        if ((buffer[4] & 0x80) != 0)
+        {
+            return 0;
+        }
+
+        return length;
     }
 
-    private static byte[] MakeCommand(Span<byte> payload)
+    private static byte[] MakeCommand(ReadOnlySpan<byte> payload)
     {
         var command = new byte[payload.Length + 6];
         MakeCommand(command, payload);
         return command;
     }
 
-    private static void MakeCommand(Span<byte> buffer, Span<byte> payload)
+    private static void MakeCommand(Span<byte> buffer, ReadOnlySpan<byte> payload)
     {
         buffer[0] = 0x52;
         buffer[1] = 0x42;
@@ -200,7 +227,7 @@ public sealed class RbtSensorSerial : IDisposable
         BinaryPrimitives.WriteUInt16LittleEndian(buffer.Slice(buffer.Length - 2, 2), crc);
     }
 
-    private static ushort CalcCrc(Span<byte> span)
+    private static ushort CalcCrc(ReadOnlySpan<byte> span)
     {
         var crc = (ushort)0xFFFF;
         for (var i = 0; i < span.Length; i++)
