@@ -161,53 +161,67 @@ public sealed class RbtSensorSerial : IDisposable
             return 0;
         }
 
-        await port.BaseStream.WriteAsync(command, cancel).ConfigureAwait(false);
-        var read = 0;
-        var length = 4;
-        while (read < length)
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancel);
+        if (port.ReadTimeout != SerialPort.InfiniteTimeout)
         {
-            var received = await port.BaseStream.ReadAsync(buffer.AsMemory(read, length - read), cancel).ConfigureAwait(false);
-            if (received == 0)
+            cts.CancelAfter(port.ReadTimeout);
+        }
+
+        try
+        {
+            await port.BaseStream.WriteAsync(command, cts.Token).ConfigureAwait(false);
+            var read = 0;
+            var length = 4;
+            while (read < length)
+            {
+                var received = await port.BaseStream.ReadAsync(buffer.AsMemory(read, length - read), cts.Token).ConfigureAwait(false);
+                if (received == 0)
+                {
+                    return 0;
+                }
+
+                read += received;
+
+                if ((read == 4) && (length == 4))
+                {
+                    if ((buffer[0] != 0x52) || (buffer[1] != 0x42))
+                    {
+                        port.DiscardInBuffer();
+                        return 0;
+                    }
+
+                    var payloadLength = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(2, 2));
+                    var total = 4 + payloadLength;
+                    if ((payloadLength < 3) || (total > buffer.Length))
+                    {
+                        port.DiscardInBuffer();
+                        return 0;
+                    }
+
+                    length = total;
+                }
+            }
+
+            var crcComputed = CalcCrc(buffer.AsSpan(0, length - 2));
+            var crcStored = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(length - 2, 2));
+            if (crcComputed != crcStored)
+            {
+                port.DiscardInBuffer();
+                return 0;
+            }
+
+            if ((buffer[4] & 0x80) != 0)
             {
                 return 0;
             }
 
-            read += received;
-
-            if ((read == 4) && (length == 4))
-            {
-                if ((buffer[0] != 0x52) || (buffer[1] != 0x42))
-                {
-                    port.DiscardInBuffer();
-                    return 0;
-                }
-
-                var payloadLength = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(2, 2));
-                var total = 4 + payloadLength;
-                if ((payloadLength < 3) || (total > buffer.Length))
-                {
-                    port.DiscardInBuffer();
-                    return 0;
-                }
-
-                length = total;
-            }
+            return length;
         }
-
-        var crcComputed = CalcCrc(buffer.AsSpan(0, length - 2));
-        var crcStored = BinaryPrimitives.ReadUInt16LittleEndian(buffer.AsSpan(length - 2, 2));
-        if (crcComputed != crcStored)
+        catch (OperationCanceledException) when (!cancel.IsCancellationRequested)
         {
             port.DiscardInBuffer();
             return 0;
         }
-
-        if ((buffer[4] & 0x80) != 0)
-        {
-            return 0;
-        }
-
-        return length;
     }
 
     private static byte[] MakeCommand(ReadOnlySpan<byte> payload)
