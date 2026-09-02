@@ -244,9 +244,9 @@ public sealed class RbtSensorSerial : IDisposable
     private static ushort CalcCrc(ReadOnlySpan<byte> span)
     {
         var crc = (ushort)0xFFFF;
-        for (var i = 0; i < span.Length; i++)
+        foreach (var c in span)
         {
-            crc = (ushort)(crc ^ span[i]);
+            crc = (ushort)(crc ^ c);
             for (var j = 0; j < 8; j++)
             {
                 var carry = crc & 1;
