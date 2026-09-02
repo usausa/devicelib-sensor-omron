@@ -54,9 +54,7 @@ public sealed class ReadCommand : CommandBase, ICommandHandler
 
 // Led
 [Command("led", "Led control")]
-public sealed class LedCommand
-{
-}
+public sealed class LedCommand;
 
 // Led on
 [Command("on", "Led on")]
